@@ -4,18 +4,17 @@ import ipaddress
 # FastAPI
 from fastapi import HTTPException, Request, status
 
-# Settings
-from settings import settings
+# Application
+from core.settings import settings  # Settings
 
 # Tuple for allowed network range IPs
 _ALLOWED_NETWORKS = tuple(
-    ipaddress.ip_network(network)
-    for network in settings.allowed_ips.split(",")
+    ipaddress.ip_network(network) for network in settings.allowed_ips.split(",")
 )
 
 
-# IP access middleware
-async def ip_middleware(request: Request):
+# IP Dependency
+async def ip_access(request: Request) -> bool:
     client_ip = ipaddress.ip_address(request.client.host)
 
     if not any(client_ip in network for network in _ALLOWED_NETWORKS):
@@ -23,3 +22,5 @@ async def ip_middleware(request: Request):
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Forbidden: Your IP is not allowed",
         )
+
+    return True

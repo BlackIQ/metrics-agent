@@ -35,13 +35,13 @@ class Settings(BaseSettings):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-        pyproject = Path(__file__).resolve().parent / "pyproject.toml"
+        pyproject = Path(__file__).resolve().parent.parent / "pyproject.toml"
 
         if pyproject.exists():
             with pyproject.open("rb") as f:
                 data = tomllib.load(f)
 
-            metadata = data.get("tool", {}).get("openhubble", {})
+            metadata = data.get("project", {})
 
             self.project_name = metadata.get("name", "")
             self.project_version = metadata.get("version", "")

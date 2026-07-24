@@ -2,12 +2,11 @@
 from fastapi import FastAPI
 from fastapi.middleware.gzip import GZipMiddleware
 
-# Router
-from routers import agent, collect
-# Config
-from settings import settings
+# Application
+from core.settings import settings  # Settings
+from routers import healthcheck, pull  # Routers
 
-# Init FastAPI app
+# Init FastAPI App
 app = FastAPI(
     title="OpenHubble Agent",
     version=settings.project_version,
@@ -23,14 +22,14 @@ app = FastAPI(
         "url": "https://github.com/OpenHubble/agent/blob/main/LICENSE",
     },
     openapi_tags=[
-        {"name": "Agent", "description": "Base routers of Agent"},
-        {"name": "Collect", "description": "Operations related to system metrics"},
-    ]
+        {"name": "Health Check", "description": "Agent health checks"},
+        {"name": "Pull", "description": "Pull metrics by cloud"},
+    ],
 )
 
 # Use GZIP to compress data
 app.add_middleware(GZipMiddleware, minimum_size=1000, compresslevel=5)
 
 # Include Router
-app.include_router(agent.router, prefix="/api")
-app.include_router(collect.router, prefix="/api")
+app.include_router(healthcheck.router, prefix="/api")
+app.include_router(pull.router, prefix="/api")
