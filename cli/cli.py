@@ -11,7 +11,7 @@ from rich_gradient import Gradient  # Gradient effects in text output
 from termcolor import cprint  # Colored terminal printing
 
 # Import app settings
-from settings import settings
+from core.settings import settings
 
 # Initialize the rich console for pretty output
 console = Console()
