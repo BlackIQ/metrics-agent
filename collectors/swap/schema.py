@@ -1,9 +1,9 @@
 # Application
-from base import BaseModel
+from base import BaseSchema
 
 
 # Collector Schema
-class CollectorSchema(BaseModel):
+class CollectorSchema(BaseSchema):
     total: int
     used: int
     free: int
