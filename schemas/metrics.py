@@ -6,7 +6,7 @@ from collectors.system.schema import CollectorSchema as SystemSchema
 from collectors.load.schema import CollectorSchema as LoadSchema
 from collectors.memory.schema import CollectorSchema as MemorySchema
 from collectors.swap.schema import CollectorSchema as SwapSchema
-from collectors.cpu.schema import CollectorSchema as CPUSchema
+from collectors.processor.schema import CollectorSchema as ProcessorSchema
 
 
 class MetricsSchema(BaseSchema):
@@ -14,4 +14,4 @@ class MetricsSchema(BaseSchema):
     load: LoadSchema
     memory: MemorySchema
     swap: SwapSchema
-    cpu: CPUSchema
+    cpu: ProcessorSchema
