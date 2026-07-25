@@ -1,9 +1,9 @@
 # Application
-from base import BaseModel
+from base import BaseSchema
 
 
 # Collector Schema
-class CollectorSchema(BaseModel):
+class CollectorSchema(BaseSchema):
     count_logical: int | None
     count_physical: int | None
     percent: float

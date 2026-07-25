@@ -14,4 +14,4 @@ router = APIRouter(
 
 @router.get("/pull", dependencies=[Depends(ip_access), Depends(apikey_access)])
 async def Pull():
-    return {"message": "Route: /api/pull"}
+    return True

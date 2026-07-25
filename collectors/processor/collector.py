@@ -12,24 +12,21 @@ from services.save import save as save_metric  # Save Metrics
 
 
 class Collector:
-    name = "memory"
+    name = "processor"
 
     interval = 5
 
     schema = CollectorSchema
 
     def collect(self) -> CollectorSchema:
-        memory = psutil.virtual_memory()
+        total_logical = psutil.cpu_count(logical=True)
+        total_physical = psutil.cpu_count(logical=False)
+        total_usage = psutil.cpu_percent(interval=0)
 
         return CollectorSchema(
-            total=memory.total,
-            active=memory.active,
-            inactive=memory.inactive,
-            free=memory.free,
-            used=memory.used,
-            available=memory.available,
-            percent=memory.percent,
-            wired=memory.wired,
+            count_logical=total_logical,
+            count_physical=total_physical,
+            percent=total_usage,
         )
 
     async def save(self, metrics: CollectorSchema):

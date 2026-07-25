@@ -1,2 +1,3 @@
 # Schemas
-from base.schema import BaseModel
+from base.schema import BaseSchema
+from base.model import BaseModel

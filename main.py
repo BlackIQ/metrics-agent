@@ -2,9 +2,13 @@
 from fastapi import FastAPI
 from fastapi.middleware.gzip import GZipMiddleware
 
+# Asyncio
+import asyncio
+
 # Application
 from core.settings import settings  # Settings
 from routers import healthcheck, pull  # Routers
+from services.run import start_collectors  # Start collector
 
 # Init FastAPI App
 app = FastAPI(
@@ -29,6 +33,12 @@ app = FastAPI(
 
 # Use GZIP to compress data
 app.add_middleware(GZipMiddleware, minimum_size=1000, compresslevel=5)
+
+
+@app.on_event("startup")
+async def startup():
+    asyncio.create_task(start_collectors())
+
 
 # Include Router
 app.include_router(healthcheck.router, prefix="/api")
