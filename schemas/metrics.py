@@ -1,5 +1,5 @@
 # Application
-from base import BaseModel
+from base import BaseSchema
 
 # Collector schemas
 from collectors.system.schema import CollectorSchema as SystemSchema
@@ -9,7 +9,7 @@ from collectors.swap.schema import CollectorSchema as SwapSchema
 from collectors.cpu.schema import CollectorSchema as CPUSchema
 
 
-class MetricsSchema(BaseModel):
+class MetricsSchema(BaseSchema):
     system: SystemSchema
     load: LoadSchema
     memory: MemorySchema
