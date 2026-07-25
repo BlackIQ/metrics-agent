@@ -40,6 +40,18 @@ class Metric(BaseModel):
         default=SyncStatus.pending,
         nullable=False,
     )
+    attempts: Mapped[int] = mapped_column(
+        default=0,
+        nullable=False,
+    )
+    last_attempt_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True),
+        nullable=True,
+    )
+    synced_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True),
+        nullable=True,
+    )
     collected_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         default=lambda: datetime.now(timezone.utc),
