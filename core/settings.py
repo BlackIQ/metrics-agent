@@ -5,6 +5,8 @@ from pathlib import Path
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+ROOT_DIR = Path(__file__).resolve().parent.parent
+
 
 # Settings Class
 class Settings(BaseSettings):
@@ -26,6 +28,8 @@ class Settings(BaseSettings):
     # API
     api_key: str = ""
 
+    database_name: str = "agent.db"
+
     # Data from pyproject.toml
     project_name: str = ""
     project_version: str = ""
@@ -35,7 +39,7 @@ class Settings(BaseSettings):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-        pyproject = Path(__file__).resolve().parent.parent / "pyproject.toml"
+        pyproject = ROOT_DIR / "pyproject.toml"
 
         if pyproject.exists():
             with pyproject.open("rb") as f:
@@ -47,6 +51,10 @@ class Settings(BaseSettings):
             self.project_version = metadata.get("version", "")
             self.project_description = metadata.get("description", "")
             self.project_authors = metadata.get("authors", [])
+
+    @property
+    def database_url(self) -> str:
+        return f"sqlite:///{ROOT_DIR / self.database_name}"
 
 
 # Run settings
