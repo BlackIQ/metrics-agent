@@ -1,13 +1,17 @@
 [Unit]
-Description=OpenHubble Monitoring Agent
-After=network.target
+Description=OpenHubble Metrics Agent
+After=network-online.target
+Wants=network-online.target
 
 [Service]
+Type=simple
 User=root
+Group=root
 WorkingDirectory=/opt/openhubble-agent
-ExecStart=/opt/openhubble-agent/.venv/bin/python3 /opt/openhubble-agent/asgi.py
-Restart=always
 Environment="PYTHONUNBUFFERED=1"
+ExecStart=/usr/local/bin/uv run fastapi run
+Restart=always
+RestartSec=5
 
 [Install]
 WantedBy=multi-user.target
