@@ -1,48 +1,101 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-# Ensure the script is run as root
-if [ "$EUID" -ne 0 ]; then
-  echo "Please run this script as root (use sudo)"
-  exit 1
+################################################################################
+# OpenHubble Metrics Agent                                                     #
+################################################################################
+# Welcome to OpenHubble Agent uninstaller                                      #
+#                                                                              #
+# GitHub: https://github.com/OpenHubble/metrics-agent                          #
+#                                                                              #
+# Created by: OpenHubble Team, Amirhossein Mohammadi 2025                      #
+#                                                                              #
+# Happy Monitoring!                                                            #
+################################################################################
+
+set -euo pipefail
+
+################################################################################
+# Uninstaller                                                                  #
+################################################################################
+
+if [[ "$EUID" -ne 0 ]]; then
+    echo "Please run this script as root (sudo)."
+    exit 1
 fi
 
-# Stop the service using systemctl
+################################################################################
+# Path                                                                         #
+################################################################################
+
+INSTALL_DIR="/opt/openhubble-agent"                      # Application
+CONFIG_DIR="/etc/openhubble-agent"                       # Settings
+DATA_DIR="/var/lib/openhubble-agent"                     # Database
+LOG_DIR="/var/log/openhubble-agent"                      # Log
+
+################################################################################
+# Stop Service                                                                 #
+################################################################################
+
 echo "Stopping service..."
-systemctl stop openhubble-agent.service || echo "Service not running."
 
-# Disable the service
-echo "Disabling service..."
-systemctl disable openhubble-agent.service || echo "Service already disabled."
+systemctl stop openhubble-agent 2>/dev/null || true
+systemctl disable openhubble-agent 2>/dev/null || true
 
-# Remove the service file
-echo "Removing service..."
+################################################################################
+# Remove Service                                                               #
+################################################################################
+
+echo "Removing systemd service..."
+
 rm -f /etc/systemd/system/openhubble-agent.service
 
-# Reload Daemon to remove any lingering references to the service
-echo "Reloading systemd daemon..."
 systemctl daemon-reload
 
-# Ask for confirmation before removing directories
-echo "This will remove the following directories:"
-echo "/opt/openhubble-agent (Agent source)"
-echo "/etc/openhubble-agent (Configuration files)"
-echo "/var/log/openhubble-agent (Logs)"
-echo "Are you sure you want to continue? (y/n)"
-read -r CONFIRM
+################################################################################
+# Remove CLI                                                                   #
+################################################################################
 
-if [[ "$CONFIRM" =~ ^[Yy]$ ]]; then
-  # Remove directories
-  echo "Removing agent files..."
-  rm -rf /opt/openhubble-agent
-  rm -rf /etc/openhubble-agent
-  rm -rf /var/log/openhubble-agent
-else
-  echo "Uninstallation aborted. Files were not deleted."
-  exit 1
-fi
+echo "Removing CLI..."
 
-# Remove the symbolic link for openhubble-agent
-echo "Removing symbolic link..."
 rm -f /usr/local/bin/openhubble-agent
 
-echo "OpenHubble Agent has been uninstalled successfully."
+################################################################################
+# Remove Application                                                           #
+################################################################################
+
+echo "Removing application..."
+
+rm -rf "$INSTALL_DIR"
+
+################################################################################
+# User Data                                                                    #
+################################################################################
+
+echo
+echo "The following user data can also be removed:"
+echo
+echo "  Configuration : $CONFIG_DIR"
+echo "  Database      : $DATA_DIR"
+echo "  Logs          : $LOG_DIR"
+echo
+
+read -rp "Remove user data? [y/N]: " CONFIRM
+
+if [[ "$CONFIRM" =~ ^[Yy]$ ]]; then
+    rm -rf "$CONFIG_DIR"
+    rm -rf "$DATA_DIR"
+    rm -rf "$LOG_DIR"
+
+    echo
+    echo "User data removed."
+else
+    echo
+    echo "Configuration, database and logs were preserved."
+fi
+
+################################################################################
+# Finished                                                                     #
+################################################################################
+
+echo
+echo "OpenHubble Metrics Agent has been uninstalled successfully."
