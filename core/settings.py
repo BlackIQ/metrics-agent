@@ -1,16 +1,30 @@
-# Pydantic Settings
+# Toml Ib
 import tomllib
+
+# Path Lib
 from pathlib import Path
 
+# Pydantic Settings
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-ROOT_DIR = Path(__file__).resolve().parent.parent
+# Check if app is installed
+INSTALLED = Path("/etc/openhubble-agent/.env").exists()
+
+# Define variables based on INSTALLED
+if INSTALLED:
+    ROOT_DIR = "/opt/openhubble-agent"
+    ENV_FILE = "/etc/openhubble-agent/.env"
+    DATA_DIR = "/var/lib/openhubble-agent"
+else:
+    ROOT_DIR = Path(__file__).resolve().parent.parent
+    ENV_FILE = ".env"
+    DATA_DIR = str(ROOT_DIR)
 
 
 # Settings Class
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(env_file=".env")
+    model_config = SettingsConfigDict(env_file=ENV_FILE)
 
     # App
     app_mode: str = ""
@@ -28,6 +42,8 @@ class Settings(BaseSettings):
     # API
     api_key: str = ""
 
+    # Database
+    database_dir: str = DATA_DIR
     database_name: str = "agent.db"
 
     # Data from pyproject.toml
@@ -54,7 +70,7 @@ class Settings(BaseSettings):
 
     @property
     def database_url(self) -> str:
-        return f"sqlite:///{ROOT_DIR / self.database_name}"
+        return f"sqlite:///{Path(self.database_dir) / self.database_name}"
 
 
 # Run settings
