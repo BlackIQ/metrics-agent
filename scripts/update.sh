@@ -1,69 +1,147 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-# Ensure the script is run as root
-if [ "$EUID" -ne 0 ]; then
-  echo "Please run this script as root (use sudo)"
-  exit 1
+################################################################################
+# OpenHubble Metrics Agent                                                     #
+################################################################################
+# Welcome to OpenHubble Agent updater                                          #
+#                                                                              #
+# GitHub: https://github.com/OpenHubble/metrics-agent                          #
+#                                                                              #
+# Created by: OpenHubble Team, Amirhossein Mohammadi 2025                      #
+#                                                                              #
+# Happy Monitoring!                                                            #
+################################################################################
+
+set -euo pipefail
+
+################################################################################
+# Updater                                                                      #
+################################################################################
+
+if [[ "$EUID" -ne 0 ]]; then
+    echo "Please run this script as root (sudo)."
+    exit 1
 fi
 
-set -e
+################################################################################
+# Path                                                                         #
+################################################################################
 
-# Set install directory
 INSTALL_DIR="/opt/openhubble-agent"
 
-# Get the latest release tag from GitHub
-LATEST_VERSION=$(curl -s "https://api.github.com/repos/OpenHubble/agent/releases/latest" | jq -r '.tag_name')
+TMP_FILE="/tmp/openhubble-agent.tar.gz"
 
-if [ -z "$LATEST_VERSION" ] || [ "$LATEST_VERSION" == "null" ]; then
-  echo "Failed to get latest version."
-  exit 1
+GITHUB_REPO="OpenHubble/metrics-agent"
+
+################################################################################
+# Check Installation                                                           #
+################################################################################
+
+if [[ ! -d "$INSTALL_DIR" ]]; then
+    echo "OpenHubble Metrics Agent is not installed."
+    exit 1
 fi
 
-TARBALL_URL="https://api.github.com/repos/OpenHubble/agent/tarball/$LATEST_VERSION"
+################################################################################
+# Get Latest Release                                                           #
+################################################################################
 
-echo "Updating OpenHubble Agent to version $LATEST_VERSION..."
+echo "Fetching latest release..."
 
-# Change directory to source directory
-cd "$INSTALL_DIR" || {
-  echo "Source directory not found."
-  exit 1
-}
+LATEST_VERSION=$(
+    curl -fsSL "https://api.github.com/repos/${GITHUB_REPO}/releases/latest" \
+    | jq -r ".tag_name"
+)
 
-# Backup existing installation (optional, in case you need to roll back)
-echo "Backing up current installation..."
-tar -czf "/tmp/openhubble-agent-backup-$LATEST_VERSION.tar.gz" "$INSTALL_DIR"
+if [[ -z "$LATEST_VERSION" || "$LATEST_VERSION" == "null" ]]; then
+    echo "Unable to determine latest release."
+    exit 1
+fi
 
-# Remove existing files
-echo "Removing old files..."
-rm -rf "$INSTALL_DIR"/*
+echo "Updating to ${LATEST_VERSION}"
 
-# Download and extract the latest version
-curl -L "$TARBALL_URL" -o /tmp/openhubble-agent.tar.gz
-tar -xzf /tmp/openhubble-agent.tar.gz --strip-components=1 -C "$INSTALL_DIR"
+TARBALL_URL="https://api.github.com/repos/${GITHUB_REPO}/tarball/${LATEST_VERSION}"
 
-# Recreate the virtual environment
-echo "Recreating virtual environment..."
-python3 -m venv "$INSTALL_DIR/.venv"
+################################################################################
+# Stop Service                                                                 #
+################################################################################
 
-# Install Python dependencies
+echo "Stopping service..."
+
+systemctl stop openhubble-agent || true
+
+################################################################################
+# Download                                                                     #
+################################################################################
+
+echo "Downloading release..."
+
+curl -fL "$TARBALL_URL" -o "$TMP_FILE"
+
+echo "Extracting..."
+
+rm -rf "${INSTALL_DIR:?}"/*
+
+tar \
+    -xzf "$TMP_FILE" \
+    --strip-components=1 \
+    -C "$INSTALL_DIR"
+
+rm -f "$TMP_FILE"
+
+################################################################################
+# Python Dependencies                                                          #
+################################################################################
+
 echo "Installing Python dependencies..."
-"$INSTALL_DIR/.venv/bin/python3" -m pip install --no-cache-dir -r "$INSTALL_DIR/requirements.txt"
 
-# Make the Agent executable
+cd "$INSTALL_DIR"
+
+uv sync
+
+################################################################################
+# Database                                                                     #
+################################################################################
+
+echo "Running database migrations..."
+
+uv run alembic upgrade head
+
+################################################################################
+# Permissions                                                                  #
+################################################################################
+
 chmod +x "$INSTALL_DIR/cli/wrapper.sh"
 
-# Create symbolic link
+################################################################################
+# CLI                                                                          #
+################################################################################
+
 ln -sf "$INSTALL_DIR/cli/wrapper.sh" /usr/local/bin/openhubble-agent
 
-# Reload the Daemon
-echo "Reloading services..."
+################################################################################
+# Systemd                                                                      #
+################################################################################
+
+echo "Updating systemd service..."
+
+cp "$INSTALL_DIR/openhubble-agent.service" /etc/systemd/system/
+
 systemctl daemon-reload
 
-# Restart the service
-echo "Restarting the service..."
-systemctl restart openhubble-agent.service || {
-  echo "Failed to restart the service."
-  exit 1
-}
+################################################################################
+# Restart                                                                      #
+################################################################################
 
-echo "OpenHubble Agent has been updated to version $LATEST_VERSION successfully."
+echo "Starting service..."
+
+systemctl restart openhubble-agent
+
+################################################################################
+# Finished                                                                     #
+################################################################################
+
+echo
+echo "OpenHubble Metrics Agent has been updated successfully."
+echo
+echo "Current Version : ${LATEST_VERSION}"
