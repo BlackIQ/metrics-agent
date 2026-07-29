@@ -1,71 +1,196 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-# Ensure the script is run as root
-if [ "$EUID" -ne 0 ]; then
-  echo "Please run this script as root (use sudo)"
-  exit 1
+################################################################################
+# OpenHubble Metrics Agent                                                     #
+################################################################################
+# Welcome to OpenHubble Agent installer                                        #
+#                                                                              #
+# GitHub: https://github.com/OpenHubble/metrics-agent                          #
+#                                                                              #
+# Created by: OpemHubble Team, Amirhossein Mohammadi 2025                      #
+#                                                                              #
+# Install:                                                                     #
+# curl -s https://get.openhubble.com/agent | sudo bash                         #
+#                                                                              #
+# Happy Monitoring!                                                            #
+################################################################################
+
+set -euo pipefail
+
+################################################################################
+# Installer                                                                    #
+################################################################################
+
+# Run this script as root
+if [[ "$EUID" -ne 0 ]]; then
+    echo "Please run this script as root (sudo)."
+    exit 1
 fi
 
-# Install dependencies
-apt update -y
-apt install -y python3 python3-venv python3-pip curl tar jq
+################################################################################
+# Path                                                                         #
+################################################################################
 
-# Set directories
-INSTALL_DIR="/opt/openhubble-agent" # Install directory
-CONFIG_DIR="/etc/openhubble-agent" # Config directory
-LOG_DIR="/var/log/openhubble-agent" # Log directory
+INSTALL_DIR="/opt/openhubble-agent"                      # Application
+CONFIG_DIR="/etc/openhubble-agent"                       # Settings
+DATA_DIR="/var/lib/openhubble-agent"                     # Database
+LOG_DIR="/var/log/openhubble-agent"                      # Log
 
-# Get the latest release tag from GitHub
-LATEST_VERSION=$(curl -s "https://api.github.com/repos/OpenHubble/agent/releases/latest" | jq -r '.tag_name')
+TMP_FILE="/tmp/openhubble-agent.tar.gz"
 
-if [ -z "$LATEST_VERSION" ] || [ "$LATEST_VERSION" == "null" ]; then
-  echo "Failed to get latest version."
-  exit 1
-fi
+GITHUB_REPO="OpenHubble/metrics-agent"
 
-TARBALL_URL="https://api.github.com/repos/OpenHubble/agent/tarball/$LATEST_VERSION"
+################################################################################
+# Dependencies                                                                 #
+################################################################################
 
-echo "Installing OpenHubble Agent version $LATEST_VERSION..."
-
-# Create directories if not exist
-mkdir -p "$INSTALL_DIR" # Ensure the install directory exists
-mkdir -p "$CONFIG_DIR" # Ensure the config directory exists
-mkdir -p "$LOG_DIR" # Ensure the logs directory exists
-
-# Download and extract the latest version
-curl -L "$TARBALL_URL" -o /tmp/openhubble-agent.tar.gz
-tar -xzf /tmp/openhubble-agent.tar.gz --strip-components=1 -C "$INSTALL_DIR"
-
-# Copy the config file to the config directory
-echo "Setting up configurations..."
-cp "$INSTALL_DIR/.env.example" "$CONFIG_DIR/.env" || {
-  echo "Failed to copy configuration file."
-  exit 1
-}
-
-# Create virtual environment
-echo "Creating virtual environment..."
-python3 -m venv "$INSTALL_DIR/.venv"
-
-# Install Python dependencies
 echo "Installing dependencies..."
-"$INSTALL_DIR/.venv/bin/python3" -m pip install --no-cache-dir -r "$INSTALL_DIR/requirements.txt"
 
-# Make Agent executable
+apt update -y
+apt install -y \
+    python3 \
+    python3-venv \
+    python3-pip \
+    curl \
+    tar \
+    jq
+
+################################################################################
+# Install uv                                                                   #
+################################################################################
+
+if ! command -v uv >/dev/null 2>&1; then
+    echo "Installing uv..."
+
+    export UV_INSTALL_DIR="/usr/local/bin"
+
+    curl -LsSf https://astral.sh/uv/install.sh | sh
+fi
+
+################################################################################
+# Get latest release                                                           #
+################################################################################
+
+echo "Fetching latest release..."
+
+LATEST_VERSION=$(
+    curl -fsSL "https://api.github.com/repos/${GITHUB_REPO}/releases/latest" \
+    | jq -r ".tag_name"
+)
+
+if [[ -z "$LATEST_VERSION" || "$LATEST_VERSION" == "null" ]]; then
+    echo "Unable to determine latest release."
+    exit 1
+fi
+
+TARBALL_URL="https://api.github.com/repos/${GITHUB_REPO}/tarball/${LATEST_VERSION}"
+
+echo "Installing OpenHubble Metrics Agent ${LATEST_VERSION}"
+
+################################################################################
+# Directories                                                                  #
+################################################################################
+
+mkdir -p "$INSTALL_DIR"
+mkdir -p "$CONFIG_DIR"
+mkdir -p "$DATA_DIR"
+mkdir -p "$LOG_DIR"
+
+################################################################################
+# Download                                                                     #
+################################################################################
+
+echo "Downloading release..."
+
+curl -fL "$TARBALL_URL" -o "$TMP_FILE"
+
+echo "Extracting..."
+
+rm -rf "${INSTALL_DIR:?}"/*
+
+tar \
+    -xzf "$TMP_FILE" \
+    --strip-components=1 \
+    -C "$INSTALL_DIR"
+
+rm -f "$TMP_FILE"
+
+################################################################################
+# Configuration                                                                #
+################################################################################
+
+echo "Setting up configuration..."
+
+if [[ ! -f "$CONFIG_DIR/.env" ]]; then
+    cp "$INSTALL_DIR/.env.example" "$CONFIG_DIR/.env"
+    echo "Created default configuration:"
+    echo "  $CONFIG_DIR/.env"
+else
+    echo "Existing configuration found. Keeping it."
+fi
+
+################################################################################
+# Python dependencies                                                          #
+################################################################################
+
+echo "Installing Python dependencies..."
+
+cd "$INSTALL_DIR"
+
+uv sync
+
+################################################################################
+# Database                                                                     #
+################################################################################
+
+echo "Initializing database..."
+
+uv run alembic upgrade head
+
+################################################################################
+# Permissions                                                                  #
+################################################################################
+
 chmod +x "$INSTALL_DIR/cli/wrapper.sh"
 
-# Create symbolic link
-ln -sf "$INSTALL_DIR/cli/wrapper.sh" /usr/local/bin/openhubble-agent
+################################################################################
+# CLI                                                                          #
+################################################################################
 
-# Copy the service file for systemctl
-echo "Setting up service..."
-cp "$INSTALL_DIR/openhubble-agent.service" /etc/systemd/system/ || {
-  echo "Failed to copy service file."
-  exit 1
-}
+ln -sf \
+    "$INSTALL_DIR/cli/wrapper.sh" \
+    /usr/local/bin/openhubble-agent
 
-# Reload Daemon
-echo "Reloading services..."
+################################################################################
+# Systemd                                                                      #
+################################################################################
+
+echo "Installing systemd service..."
+
+if [[ ! -f "$INSTALL_DIR/openhubble-agent.service" ]]; then
+    echo "Service file not found."
+    exit 1
+fi
+
+cp "$INSTALL_DIR/openhubble-agent.service" /etc/systemd/system/
+
 systemctl daemon-reload
+systemctl enable openhubble-agent
 
-echo "OpenHubble Agent ($LATEST_VERSION) has been installed successfully."
+################################################################################
+# Finished                                                                     #
+################################################################################
+
+echo
+echo "OpenHubble Metrics Agent ${LATEST_VERSION} installed successfully."
+echo
+echo "Directories:"
+echo "  Application : $INSTALL_DIR"
+echo "  Config      : $CONFIG_DIR"
+echo "  Database    : $DATA_DIR"
+echo "  Logs        : $LOG_DIR"
+echo
+echo "Configuration:"
+echo "  $CONFIG_DIR/.env"
+echo
+echo "Edit the configuration before starting the service."
