@@ -1,6 +1,10 @@
 # Asyncio
 import asyncio
 
+# Time
+import time
+import psutil
+
 # Schema
 from .schema import CollectorSchema
 
@@ -19,7 +23,7 @@ class Collector:
     def collect(self) -> CollectorSchema:
         return CollectorSchema(
             hostname=settings.hostname,
-            uptime=0,
+            uptime=int(time.time() - psutil.boot_time()),
         )
 
     async def save(self, metrics: CollectorSchema):
