@@ -6,7 +6,7 @@ from datetime import datetime
 
 # Application
 from base import BaseSchema  # Base
-from enums.sync import SyncStatus
+from enums.sync import SyncStatus  # Enum
 
 # Collector schemas
 from collectors.system.schema import CollectorSchema as SystemSchema
@@ -32,4 +32,3 @@ class ReadMetricsSchema(BaseSchema):
     last_attempt_at: datetime | None = None
     synced_at: datetime | None = None
     collected_at: datetime
-    # metrics: MetricDataSchema
