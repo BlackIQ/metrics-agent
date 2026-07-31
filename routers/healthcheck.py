@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends
 # Application
 from dependencies.apikey import apikey_access  # API Key
 from dependencies.ip import ip_access  # IP
+from schemas.message import MessageSchema  # Schemas
 
 # Router
 router = APIRouter(
@@ -12,6 +13,12 @@ router = APIRouter(
 )
 
 
-@router.get("/ping", dependencies=[Depends(ip_access), Depends(apikey_access)])
+@router.get(
+    "/ping",
+    response_model=MessageSchema,
+    dependencies=[Depends(ip_access), Depends(apikey_access)],
+)
 async def ping():
-    return {"message": "Route: /api/ping"}
+    return MessageSchema(
+        message="Pong",
+    )

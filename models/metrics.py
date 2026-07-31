@@ -2,22 +2,18 @@
 from sqlalchemy import Uuid, JSON, DateTime, Enum
 from sqlalchemy.orm import Mapped, mapped_column
 
-# Libs
+# UUID
 import uuid
+
+# Typing
 from typing import Any
-from enum import StrEnum
+
+# Datetime
 from datetime import datetime, timezone
 
 # Application
 from base import BaseModel  # Base
-
-
-# Sync Status Enum
-class SyncStatus(StrEnum):
-    pending = "pending"
-    sending = "sending"
-    synced = "synced"
-    failed = "failed"
+from enums.sync import SyncStatus
 
 
 # Metric Model

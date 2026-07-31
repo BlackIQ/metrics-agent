@@ -2,6 +2,9 @@
 from fastapi import FastAPI
 from fastapi.middleware.gzip import GZipMiddleware
 
+# Context
+from contextlib import asynccontextmanager
+
 # Asyncio
 import asyncio
 
@@ -9,6 +12,14 @@ import asyncio
 from core.settings import settings  # Settings
 from routers import healthcheck, pull  # Routers
 from services.run import start_collectors  # Start collector
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    collector_task = asyncio.create_task(start_collectors())
+    yield
+    collector_task.cancel()
+
 
 # Init FastAPI App
 app = FastAPI(
@@ -29,15 +40,11 @@ app = FastAPI(
         {"name": "Health Check", "description": "Agent health checks"},
         {"name": "Pull", "description": "Pull metrics by cloud"},
     ],
+    lifespan=lifespan,
 )
 
 # Use GZIP to compress data
 app.add_middleware(GZipMiddleware, minimum_size=1000, compresslevel=5)
-
-
-@app.on_event("startup")
-async def startup():
-    asyncio.create_task(start_collectors())
 
 
 # Include Router
