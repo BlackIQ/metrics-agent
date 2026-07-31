@@ -4,6 +4,9 @@ import uuid
 # Datetime
 from datetime import datetime
 
+# Typing
+from typing import Any
+
 # Application
 from base import BaseSchema  # Base
 from enums.sync import SyncStatus  # Enum
@@ -32,3 +35,4 @@ class ReadMetricsSchema(BaseSchema):
     last_attempt_at: datetime | None = None
     synced_at: datetime | None = None
     collected_at: datetime
+    metrics: dict[str, Any]
