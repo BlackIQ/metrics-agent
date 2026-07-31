@@ -24,6 +24,6 @@ router = APIRouter(
     dependencies=[Depends(ip_access), Depends(apikey_access)],
 )
 async def Pull(db: Session = Depends(get_db)):
-    db_metrics = db.query(Metric).limit(10).all()
+    db_metrics = db.query(Metric).limit(10).order_by(Metric.collected_at.desc()).all()
 
     return db_metrics
