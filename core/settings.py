@@ -13,7 +13,7 @@ INSTALLED = Path("/etc/openhubble-agent/.env").exists()
 
 # Define variables based on INSTALLED
 if INSTALLED:
-    ROOT_DIR = "/opt/openhubble-agent"
+    ROOT_DIR = Path("/opt/openhubble-agent")
     ENV_FILE = "/etc/openhubble-agent/.env"
     DATA_DIR = "/var/lib/openhubble-agent"
 else:
