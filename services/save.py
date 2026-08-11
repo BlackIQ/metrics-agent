@@ -5,9 +5,13 @@ import asyncio
 from datetime import datetime, timezone
 
 # Application
+from core.logger import get_logger  # Logger
 from database.database import session  # Database
 from models import Metric  # Models
 from base import BaseSchema  # Base
+
+# Logger (Save)
+logger = get_logger("save")
 
 
 def _save_sync(collector: str, metrics_data: dict):
@@ -22,7 +26,10 @@ def _save_sync(collector: str, metrics_data: dict):
         db.add(db_metric)
         db.commit()
 
-        print(f"Metric of {collector} is saved")
+        logger.debug(f"Metric '{collector}' saved to SQLite buffer.")
+    except Exception as e:
+        db.rollback()
+        logger.error(f"Failed to save metric '{collector}': {e}", exc_info=True)
     finally:
         db.close()
 

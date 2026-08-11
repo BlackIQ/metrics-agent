@@ -10,13 +10,19 @@ INSTALLED = Path("/etc/openhubble-agent/.env").exists()
 
 # Now we need to define variables based on INSTALLED
 if INSTALLED:
-    ROOT_DIR = Path("/opt/openhubble-agent")  # Root
+    ROOT_DIR = Path("/opt/openhubble-agent")  # Application
     ENV_FILE = Path("/etc/openhubble-agent/.env")  # Settings
-    DATA_DIR = "/var/lib/openhubble-agent"  # Data
+    DATA_DIR = "/var/lib/openhubble-agent"  # Database
+    LOG_DIR = Path("/var/log/openhubble-agent")  # Log
 else:
-    ROOT_DIR = Path(__file__).resolve().parent.parent  # Root
+    ROOT_DIR = Path(__file__).resolve().parent.parent  # Application
     ENV_FILE = Path(".env")  # Settings
-    DATA_DIR = str(ROOT_DIR)  # Data
+    DATA_DIR = str(ROOT_DIR)  # Database
+    LOG_DIR = ROOT_DIR / "logs"  # Log
+
+# Ensure directories exist
+LOG_DIR.mkdir(parents=True, exist_ok=True)
+LOG_FILE = LOG_DIR / "openhubble-agent.log"
 
 
 # Load toml file

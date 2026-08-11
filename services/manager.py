@@ -3,8 +3,12 @@ import asyncio  # Asyncio
 from typing import Dict, Any  # Types
 
 # Application
+from core.logger import get_logger  # Logger
 from collectors.registry import PluginRegistry  # Collector Registry
 from services.save import save as save_metric  # Save Service
+
+# Logger (Manager)
+logger = get_logger("manager")
 
 
 class CollectorManager:
@@ -20,7 +24,8 @@ class CollectorManager:
 
         # Stop disabled or removed collectors
         for name in current_names - desired_names:
-            print(f"[Manager] Stopping collector task: {name}")
+            logger.info(f"Stopping collector task: {name}")
+
             self.tasks[name].cancel()
             del self.tasks[name]
             del self.configs[name]
@@ -43,27 +48,31 @@ class CollectorManager:
                     task = asyncio.create_task(self._run_collector_loop(inst))
                     self.tasks[name] = task
                     self.configs[name] = cfg
-                    print(
-                        f"[Manager] Started collector task: '{name}' (interval: {inst.interval}s)"
+
+                    logger.info(
+                        f"Started collector task: '{name}' (interval: {inst.interval}s)"
                     )
                 else:
-                    print(
-                        f"[Manager] WARNING: Collector '{name}' requested in config but not found in PluginRegistry!"
+                    logger.warning(
+                        f"Collector '{name}' requested in config but not found in PluginRegistry!"
                     )
 
     async def _run_collector_loop(self, collector):
-        print(f"[Collector:{collector.name}] Loop started.")
+        logger.debug(f"[{collector.name}] Collector loop started.")
+
         while True:
             try:
                 metrics = await collector.collect()
                 await save_metric(collector.name, metrics)
             except asyncio.CancelledError:
-                print(f"[Collector:{collector.name}] Task cancelled.")
+                logger.info(f"[{collector.name}] Collector task cancelled.")
                 break
             except Exception as e:
-                print(f"[Collector:{collector.name}] Error collecting metrics: {e}")
+                logger.error(
+                    f"[{collector.name}] Error collecting metrics: {e}",
+                    exc_info=True,
+                )
 
-            # Fallback to default 5 seconds if interval isn't set
             sleep_time = getattr(collector, "interval", 5) or 5
             await asyncio.sleep(sleep_time)
 

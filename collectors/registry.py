@@ -5,7 +5,11 @@ import inspect  # Inspect lib
 from typing import Dict, Type  # Types
 
 # Application
+from core.logger import get_logger  # Logger
 from collectors.base import BaseCollector  # Base
+
+# Logger (Registry)
+logger = get_logger("registry")
 
 
 # Plugin Registry
@@ -32,7 +36,9 @@ class PluginRegistry:
                     ):
                         cls._registry[obj.name] = obj
             except Exception as e:
-                print(f"Failed to load collector module {module_name}: {e}")
+                logger.error(f"Failed to load collector module '{module_name}': {e}")
+
+        logger.info(f"Discovered collectors: {list(cls._registry.keys())}")
 
     @classmethod
     def get(cls, name: str) -> Type[BaseCollector] | None:
