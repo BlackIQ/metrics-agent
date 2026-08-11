@@ -21,29 +21,12 @@ console = Console()
 def print_art():
     openhubble_art = text2art("OpenHubble")
     agent_art = text2art("Agent")
-    pallete1 = [
-        "#8b0000",
-        "#dc143c",
-        "#ff7f50",
-        "#ffc0cb"
-    ]
+    pallete1 = ["#8b0000", "#dc143c", "#ff7f50", "#ffc0cb"]
 
     print("\n")
 
-    console.print(
-        Gradient(
-            openhubble_art,
-            colors=pallete1,
-            justify="center"
-        )
-    )
-    console.print(
-        Gradient(
-            agent_art,
-            colors=pallete1[::-1],
-            justify="center"
-        )
-    )
+    console.print(Gradient(openhubble_art, colors=pallete1, justify="center"))
+    console.print(Gradient(agent_art, colors=pallete1[::-1], justify="center"))
 
 
 # Function to start the service using systemctl
@@ -99,13 +82,20 @@ def update(get_confirmation=True):
 
     # Check if an update is actually needed
     if current_version == latest_version:
-        cprint(f"You are already using the latest version ({current_version}). No update needed.", "yellow")
+        cprint(
+            f"You are already using the latest version ({current_version}). No update needed.",
+            "yellow",
+        )
         return
 
     cprint(f"Updating to version {latest_version}...", "blue")
 
     if get_confirmation:
-        confirmation = input("Are you sure you want to update the service? (yes/no): ").strip().lower()
+        confirmation = (
+            input("Are you sure you want to update the service? (yes/no): ")
+            .strip()
+            .lower()
+        )
         if confirmation not in ["yes", "y"]:
             cprint("Updating aborted.", "yellow")
             return
@@ -120,7 +110,11 @@ def uninstall():
     cprint("Uninstalling the service...", "red")
 
     # Confirmation prompt
-    confirmation = input("Are you sure you want to uninstall the service? (yes/no): ").strip().lower()
+    confirmation = (
+        input("Are you sure you want to uninstall the service? (yes/no): ")
+        .strip()
+        .lower()
+    )
 
     if confirmation in ["yes", "y"]:
         uninstall_script = "/opt/openhubble-agent/scripts/uninstall.sh"
@@ -161,7 +155,7 @@ def compare_versions(current_version, releases):
             f"| {name}",
             f"| Version: {latest_version}",
             f"| Release link: {release_url}",
-            "+-----------------------------------------------+"
+            "+-----------------------------------------------+",
         ]
         return "\n".join(messages)
     else:
@@ -169,8 +163,13 @@ def compare_versions(current_version, releases):
 
 
 def ask_user_to_update(current_version):
-    confirmation = input(
-        f"You are already using {current_version}. Would you want to update? (yes/no): ").strip().lower()
+    confirmation = (
+        input(
+            f"You are already using {current_version}. Would you want to update? (yes/no): "
+        )
+        .strip()
+        .lower()
+    )
 
     if confirmation in ["yes", "y"]:
         update(False)
@@ -219,7 +218,9 @@ def main():
 
     # Define subcommand for logs, with an optional argument to follow the logs
     logs_parser = subparsers.add_parser("logs", help="Show logs")
-    logs_parser.add_argument("-f", "--follow", action="store_true", help="Follow the logs")
+    logs_parser.add_argument(
+        "-f", "--follow", action="store_true", help="Follow the logs"
+    )
 
     subparsers.add_parser("update", help="Update the service")
     subparsers.add_parser("uninstall", help="Uninstall the service")
