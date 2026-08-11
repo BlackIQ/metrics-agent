@@ -18,7 +18,5 @@ async def start_collectors():
         LoadCollector(),
     ]
 
-    tasks = []
-
-    for collector in collectors:
-        tasks.append(asyncio.create_task(collector.run()))
+    # Run all collector loops concurrently
+    await asyncio.gather(*(collector.run() for collector in collectors))

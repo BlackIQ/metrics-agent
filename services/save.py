@@ -5,13 +5,14 @@ import asyncio
 from datetime import datetime, timezone
 
 # Application
-from base import BaseSchema  # Base
-from models import Metric  # Models
 from database.database import session  # Database
+from models import Metric  # Models
+from base import BaseSchema  # Base
 
 
 def _save_sync(collector: str, metrics_data: dict):
     db = session()
+
     try:
         db_metric = Metric(
             collector=collector,
