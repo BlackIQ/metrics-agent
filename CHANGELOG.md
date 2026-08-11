@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.19.1] - 2026-08-11
+
+### Fixed
+
+- Fixed an issue where OpenHubble Agent settings were not loaded correctly.
+- Improved configuration initialization and settings availability during application startup.
+
 ## [2.19.0] - 2026-07-31
 
 ### Added
