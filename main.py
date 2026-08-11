@@ -27,7 +27,8 @@ async def lifespan(app: FastAPI):
         # {"name": "swap", "enabled": True, "options": {"interval": 5}},
         # {"name": "load", "enabled": True, "options": {"interval": 5}},
         # {"name": "network", "enabled": True, "options": {"interval": 5}},
-        {"name": "disk", "enabled": True, "options": {"interval": 10}},
+        # {"name": "disk", "enabled": True, "options": {"interval": 10}},
+        {"name": "io", "enabled": True, "options": {"interval": 5}},
     ]
 
     await collector_manager.reload_config(default_config)
