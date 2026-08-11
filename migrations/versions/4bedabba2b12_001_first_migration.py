@@ -1,8 +1,8 @@
-"""First check
+"""001_first_migration
 
-Revision ID: f7ad4ba8e1b5
+Revision ID: 4bedabba2b12
 Revises: 
-Create Date: 2026-07-25 06:12:43.352309
+Create Date: 2026-08-11 15:35:23.916812
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = 'f7ad4ba8e1b5'
+revision: str = '4bedabba2b12'
 down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -24,7 +24,10 @@ def upgrade() -> None:
     op.create_table('metrics',
     sa.Column('id', sa.Uuid(), nullable=False),
     sa.Column('collector', sa.String(), nullable=False),
-    sa.Column('sync_status', sa.Enum('pending', 'sending', 'synced', 'failed', name='syncstatus'), nullable=False),
+    sa.Column('sync_status', sa.Enum('pending', 'processing', 'synced', 'failed', name='syncstatus'), nullable=False),
+    sa.Column('attempts', sa.Integer(), nullable=False),
+    sa.Column('last_attempt_at', sa.DateTime(timezone=True), nullable=True),
+    sa.Column('synced_at', sa.DateTime(timezone=True), nullable=True),
     sa.Column('collected_at', sa.DateTime(timezone=True), nullable=False),
     sa.Column('metrics', sa.JSON(), nullable=False),
     sa.PrimaryKeyConstraint('id')

@@ -1,6 +1,6 @@
 [project]
 name = "openHubble-agent"
-version = "2.19.1"
+version = "2.20.0"
 description = "Lightweight system monitoring agent"
 authors = ["OpenHubble Team <team@openhubble.com>", "Amirhossein Mohammadi <hi@amirhossein.info>"]
 readme = "README.md"
