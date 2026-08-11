@@ -12,13 +12,18 @@ import asyncio
 from core.settings import settings  # Settings
 from routers import healthcheck, pull  # Routers
 from services.run import start_collectors  # Start collector
+from services.cleanup import cleanup_old_metrics  # Cleanup old metrics
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     collector_task = asyncio.create_task(start_collectors())
+    cleanup_task = asyncio.create_task(cleanup_old_metrics(retention_days=7))
+
     yield
+
     collector_task.cancel()
+    cleanup_task.cancel()
 
 
 # Init FastAPI App
