@@ -11,18 +11,29 @@ import asyncio
 # Application
 from core.settings import settings  # Settings
 from routers import healthcheck, pull  # Routers
-from services.run import start_collectors  # Start collector
-from services.cleanup import cleanup_old_metrics  # Cleanup old metrics
+from collectors.registry import PluginRegistry  # Collector Registry
+from services.manager import collector_manager  # Servie Manager
+from services.cleanup import cleanup_old_metrics  # Service Cleanup
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    collector_task = asyncio.create_task(start_collectors())
+    PluginRegistry.discover()
+
+    default_config = [
+        {"name": "system", "enabled": True, "options": {"interval": 5}},
+        {"name": "processor", "enabled": True, "options": {"interval": 5}},
+        {"name": "memory", "enabled": True, "options": {"interval": 5}},
+        {"name": "swap", "enabled": True, "options": {"interval": 5}},
+        {"name": "load", "enabled": True, "options": {"interval": 5}},
+    ]
+
+    await collector_manager.reload_config(default_config)
     cleanup_task = asyncio.create_task(cleanup_old_metrics(retention_days=7))
 
     yield
 
-    collector_task.cancel()
+    collector_manager.stop_all()
     cleanup_task.cancel()
 
 
