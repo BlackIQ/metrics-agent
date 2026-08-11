@@ -457,7 +457,7 @@ wheels = [
 
 [[package]]
 name = "openhubble-agent"
-version = "2.19.0"
+version = "2.19.1"
 source = { virtual = "." }
 dependencies = [
     { name = "alembic" },
