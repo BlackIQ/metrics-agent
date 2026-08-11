@@ -5,6 +5,71 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.0.0] - 2026-08-12
+
+### Added
+
+- Introduced the new **Runtime Monitoring Agent** architecture.
+- Introduced a **plugin-based architecture** for runtime monitoring.
+- Added a **Plugin Registry** for automatic plugin discovery and management.
+- Converted existing built-in monitoring functionality into plugins.
+- Added built-in **Disk** plugin.
+- Added built-in **I/O** plugin.
+- Added built-in **Network** plugin.
+- Added **PostgreSQL** plugin.
+- Added **Docker** plugin.
+- Added support for activating optional plugins through the OpenHubble CLI.
+- Added a complete project-wide logging system.
+- Added persistent agent logs under `/var/log/openhubble-agent`.
+
+### Changed
+
+- Reworked data collection architecture around a centralized `manager.py`.
+- Moved metric collection and orchestration away from the previous `run.py`, `save.py`, and related boilerplate.
+- Reorganized the Agent around the new plugin and registry architecture.
+- Simplified the internal data collection pipeline.
+- Improved plugin discovery and lifecycle management.
+- Improved CLI plugin management workflow.
+
+### Improved
+
+- Significantly improved Agent performance.
+- Reduced unnecessary boilerplate and duplicated logic.
+- Improved asynchronous execution and metric collection.
+- Improved overall code organization and maintainability.
+- Improved OpenHubble CLI speed and usability.
+- Improved CLI reliability.
+- Improved logging and operational visibility.
+
+### Fixed
+
+- Fixed an issue preventing the OpenHubble CLI from working correctly.
+- Fixed issues in the previous plugin/command management workflow.
+
+### Removed
+
+- Removed legacy hard-coded metric collection architecture.
+- Removed unnecessary collection boilerplate previously distributed across multiple modules.
+
+### Architecture
+
+OpenHubble Agent is now a **Runtime Monitoring Agent** built around a discoverable plugin architecture.
+
+The Agent can discover and manage monitoring plugins through its Plugin Registry, allowing monitoring capabilities to be added without modifying the core Agent.
+
+Built-in plugins now include:
+
+- Host
+- Memory
+- CPU
+- Load
+- Swap
+- Disk
+- I/O
+- Network
+- PostgreSQL
+- Docker
+
 ## [2.20.0] - 2026-08-11
 
 ### Added
