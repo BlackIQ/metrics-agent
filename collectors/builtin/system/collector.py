@@ -10,7 +10,7 @@ from core.settings import settings
 
 # System
 class Collector(BaseCollector):
-    name = "swap"
+    name = "system"
     default_interval = 5
 
     async def collect(self) -> CollectorSchema:
