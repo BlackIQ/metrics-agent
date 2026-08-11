@@ -5,9 +5,13 @@ import asyncio
 from datetime import datetime, timedelta, timezone
 
 # Application
+from core.logger import get_logger  # Logger
 from database.database import session  # Database
 from models import Metric  # Models
 from enums.sync import SyncStatus  # Enums
+
+# Logger (Cleanup)
+logger = get_logger("cleanup")
 
 
 async def cleanup_old_metrics(retention_days: int = 7):
@@ -32,8 +36,10 @@ async def cleanup_old_metrics(retention_days: int = 7):
             db.commit()
 
             if len(db_metrics) > 0:
-                print(f"Cleaned up {len(db_metrics)} synced metrics.")
+                logger.info(
+                    f"Cleaned up {count} synced metrics older than {retention_days} days."
+                )
         except Exception as e:
-            print(f"Error during metric cleanup: {e}")
+            logger.error(f"Error during metric cleanup: {e}", exc_info=True)
 
         await asyncio.sleep(21600)
