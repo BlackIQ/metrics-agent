@@ -36,3 +36,7 @@ class ReadMetricsSchema(BaseSchema):
     synced_at: datetime | None = None
     collected_at: datetime
     metrics: dict[str, Any]
+
+
+class AckSchema(BaseSchema):
+    metric_ids: list[uuid.UUID] = []

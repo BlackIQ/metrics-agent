@@ -8,5 +8,5 @@ class CollectorSchema(BaseSchema):
     used: int
     free: int
     percent: float
-    sin: int
-    sout: int
+    sin: int = 0
+    sout: int = 0

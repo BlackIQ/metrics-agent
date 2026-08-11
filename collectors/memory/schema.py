@@ -9,6 +9,6 @@ class CollectorSchema(BaseSchema):
     percent: float
     used: int
     free: int
-    active: int
-    inactive: int
-    wired: int
+    active: int = 0
+    inactive: int = 0
+    wired: int = 0

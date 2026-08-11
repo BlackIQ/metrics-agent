@@ -23,13 +23,13 @@ class Collector:
 
         return CollectorSchema(
             total=memory.total,
-            active=memory.active,
-            inactive=memory.inactive,
-            free=memory.free,
-            used=memory.used,
             available=memory.available,
             percent=memory.percent,
-            wired=memory.wired,
+            used=memory.used,
+            free=memory.free,
+            active=getattr(memory, "active", 0),
+            inactive=getattr(memory, "inactive", 0),
+            wired=getattr(memory, "wired", 0),
         )
 
     async def save(self, metrics: CollectorSchema):
