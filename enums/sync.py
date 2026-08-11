@@ -5,6 +5,6 @@ from enum import StrEnum
 # Sync Status Enum
 class SyncStatus(StrEnum):
     pending = "pending"
-    sending = "sending"
+    processing = "processing"
     synced = "synced"
     failed = "failed"
