@@ -12,11 +12,11 @@ from base import BaseSchema  # Base
 from enums.sync import SyncStatus  # Enum
 
 # Collector schemas
-from collectors.system.schema import CollectorSchema as SystemSchema
-from collectors.load.schema import CollectorSchema as LoadSchema
-from collectors.memory.schema import CollectorSchema as MemorySchema
-from collectors.swap.schema import CollectorSchema as SwapSchema
-from collectors.processor.schema import CollectorSchema as ProcessorSchema
+from collectors.builtin.system.schema import CollectorSchema as SystemSchema
+from collectors.builtin.load.schema import CollectorSchema as LoadSchema
+from collectors.builtin.memory.schema import CollectorSchema as MemorySchema
+from collectors.builtin.swap.schema import CollectorSchema as SwapSchema
+from collectors.builtin.processor.schema import CollectorSchema as ProcessorSchema
 
 
 class MetricDataSchema(BaseSchema):

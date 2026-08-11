@@ -27,9 +27,12 @@ def _save_sync(collector: str, metrics_data: dict):
         db.close()
 
 
-async def save(collector: str, metrics: BaseSchema):
-    await asyncio.to_thread(
-        _save_sync,
-        collector,
-        metrics.model_dump(mode="json"),
-    )
+async def save(collector: str, metrics: BaseSchema | dict):
+    if isinstance(metrics, BaseSchema):
+        data = metrics.model_dump(mode="json")
+    elif isinstance(metrics, dict):
+        data = metrics
+    else:
+        data = dict(metrics)
+
+    await asyncio.to_thread(_save_sync, collector, data)
