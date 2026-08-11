@@ -21,11 +21,12 @@ async def lifespan(app: FastAPI):
     PluginRegistry.discover()
 
     default_config = [
-        {"name": "system", "enabled": True, "options": {"interval": 5}},
-        {"name": "processor", "enabled": True, "options": {"interval": 5}},
-        {"name": "memory", "enabled": True, "options": {"interval": 5}},
-        {"name": "swap", "enabled": True, "options": {"interval": 5}},
-        {"name": "load", "enabled": True, "options": {"interval": 5}},
+        # {"name": "system", "enabled": True, "options": {"interval": 5}},
+        # {"name": "processor", "enabled": True, "options": {"interval": 5}},
+        # {"name": "memory", "enabled": True, "options": {"interval": 5}},
+        # {"name": "swap", "enabled": True, "options": {"interval": 5}},
+        # {"name": "load", "enabled": True, "options": {"interval": 5}},
+        {"name": "network", "enabled": True, "options": {"interval": 5}},
     ]
 
     await collector_manager.reload_config(default_config)
