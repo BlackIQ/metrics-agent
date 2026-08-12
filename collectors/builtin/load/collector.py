@@ -10,6 +10,7 @@ from .schema import CollectorSchema  # Collector Schema
 class Collector(BaseCollector):
     name = "load"
     default_interval = 5
+    schema_cls = CollectorSchema
 
     async def collect(self) -> CollectorSchema:
         min_1, min_3, min_15 = os.getloadavg()

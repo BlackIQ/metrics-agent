@@ -12,6 +12,7 @@ from core.settings import settings
 class Collector(BaseCollector):
     name = "system"
     default_interval = 5
+    schema_cls = CollectorSchema
 
     async def collect(self) -> CollectorSchema:
         return CollectorSchema(

@@ -12,6 +12,7 @@ from .schema import NetworkCollectorSchema, InterfaceMetricsSchema  # Collector 
 class Collector(BaseCollector):
     name = "network"
     default_interval = 5
+    schema_cls = NetworkCollectorSchema
 
     def __init__(self, config: Dict[str, Any] | None = None):
         super().__init__(config)

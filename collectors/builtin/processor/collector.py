@@ -10,6 +10,7 @@ from .schema import CollectorSchema  # Collector Schema
 class Collector(BaseCollector):
     name = "processor"
     default_interval = 5
+    schema_cls = CollectorSchema
 
     async def collect(self) -> CollectorSchema:
         total_logical = psutil.cpu_count(logical=True)

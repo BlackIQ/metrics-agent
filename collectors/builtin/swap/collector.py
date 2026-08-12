@@ -10,6 +10,7 @@ from .schema import CollectorSchema  # Collector Schema
 class Collector(BaseCollector):
     name = "swap"
     default_interval = 5
+    schema_cls = CollectorSchema
 
     async def collect(self) -> CollectorSchema:
         swap = psutil.swap_memory()

@@ -10,6 +10,7 @@ from .schema import PostgresSchema  # Collector Schema
 class Collector(BaseCollector):
     name = "postgresql"
     default_interval = 10
+    schema_cls = PostgresSchema
 
     async def collect(self) -> PostgresSchema:
         dsn = self.config.get(
