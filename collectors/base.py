@@ -1,6 +1,6 @@
 # Libs
 from abc import ABC, abstractmethod  # Abstract
-from typing import Any, Dict  # Types
+from typing import Any, Dict, Type  # Types
 
 # Application
 from base import BaseSchema  # Base
@@ -10,6 +10,7 @@ from base import BaseSchema  # Base
 class BaseCollector(ABC):
     name: str
     default_interval: int = 15
+    schema_cls: Type[BaseSchema] | None = None
 
     def __init__(self, config: Dict[str, Any] | None = None):
         self.config = config or {}
