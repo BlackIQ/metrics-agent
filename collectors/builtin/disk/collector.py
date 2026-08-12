@@ -11,7 +11,8 @@ from .schema import DiskCollectorSchema, MountUsageSchema  # Collector Schemas
 # Disk
 class Collector(BaseCollector):
     name = "disk"
-    default_interval = 10
+    default_interval = 5
+    schema_cls = DiskCollectorSchema
 
     IGNORED_FSTYPES = {
         "tmpfs",

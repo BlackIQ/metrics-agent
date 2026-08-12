@@ -11,6 +11,7 @@ from .schema import DockerCollectorSchema, ContainerMetricsSchema # Collector Sc
 class Collector(BaseCollector):
     name = "docker"
     default_interval = 10
+    schema_cls = DockerCollectorSchema
 
     def _calculate_cpu_percent(self, stats: Dict[str, Any]) -> float:
         try:

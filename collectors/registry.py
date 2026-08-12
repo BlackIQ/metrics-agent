@@ -2,7 +2,7 @@
 import importlib  # Import lib
 import pkgutil  # Package Util
 import inspect  # Inspect lib
-from typing import Dict, Type  # Types
+from typing import Dict, Type, Any  # Types
 
 # Application
 from core.logger import get_logger  # Logger
@@ -47,3 +47,12 @@ class PluginRegistry:
     @classmethod
     def list_available(cls) -> list[str]:
         return list(cls._registry.keys())
+
+    @classmethod
+    def get_all_schemas(cls) -> dict[str, Any]:
+        schemas = {}
+        for name, collector_cls in cls._registry.items():
+            if hasattr(collector_cls, "schema_cls") and collector_cls.schema_cls:
+                schemas[name] = collector_cls.schema_cls
+
+        return schemas

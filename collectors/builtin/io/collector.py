@@ -12,6 +12,7 @@ from .schema import IOCollectorSchema, DriveIOSchema  # Collector Schemas
 class Collector(BaseCollector):
     name = "io"
     default_interval = 5
+    schema_cls = IOCollectorSchema
 
     def __init__(self, config: Dict[str, Any] | None = None):
         super().__init__(config)
